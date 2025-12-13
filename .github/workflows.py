@@ -1,45 +1,27 @@
-import requests
-from typing import Optional
+name: Python CI
 
+on:
+  push:
+  pull_request:
 
-class Brewery:
-    def __init__(
-        self,
-        brewery_id: str,
-        name: str,
-        brewery_type: str,
-        city: str,
-        street: Optional[str],
-        country: str,
-        latitude: Optional[str],
-        longitude: Optional[str],
-    ):
-        self.brewery_id = brewery_id
-        self.name = name
-        self.brewery_type = brewery_type
-        self.city = city
-        self.street = street
-        self.country = country
-        self.latitude = latitude
-        self.longitude = longitude
+jobs:
+  pep8-check:
+    runs-on: ubuntu-latest
 
-    def __str__(self) -> str:
-        return (
-            "Brewery:\n"
-            f"  Name: {self.name}\n"
-            f"  Type: {self.brewery_type}\n"
-            f"  City: {self.city}\n"
-            f"  Street: {self.street}\n"
-            f"  Country: {self.country}\n"
-            f"  Coordinates: ({self.latitude}, {self.longitude})"
-        )
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-def fetch_breweries():
-    url = "https://api.openbrewerydb.org/breweries"
-    params = {"per_page": 20}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pycodestyle requests
 
-    response = requests.get(url, params=params, timeout=10)
-    response.raise_for_status()
-
-    return response.json()
+      - name: Run PEP8 (pycodestyle)
+        run: |
+          pycodestyle .
